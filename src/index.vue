@@ -1,5 +1,5 @@
 <template>
-    <form :action="url" class="vue-dropzone dropzone" :id="id">
+    <form class="vue-dropzone dropzone" :id="id">
         <slot></slot>
     </form>
 </template>
@@ -8,10 +8,6 @@
     export default {
         props: {
             id: {
-                type: String,
-                required: true
-            },
-            url: {
                 type: String,
                 required: true
             },
@@ -25,14 +21,6 @@
             },
             acceptedFileTypes: {
                 type: String
-            },
-            thumbnailHeight: {
-                type: Number,
-                default: 200
-            },
-            thumbnailWidth: {
-                type: Number,
-                default: 200
             },
             showRemoveLink: {
                 type: Boolean,
@@ -61,25 +49,6 @@
                 type: Object,
                 default: function () {
                     return {}
-                }
-            },
-            previewTemplate: {
-                type: Function,
-                default: (options) => {
-                    return `
-                        <div class="dz-preview dz-file-preview">
-                            <div class="dz-image" style="width: ${options.thumbnailWidth}px;height: ${options.thumbnailHeight}px">
-                            <img data-dz-thumbnail /></div>
-                            <div class="dz-details">
-                                <div class="dz-size"><span data-dz-size></span></div>
-                                <div class="dz-filename"><span data-dz-name></span></div>
-                            </div>
-                            <div class="dz-progress"><span class="dz-upload" data-dz-uploadprogress></span></div>
-                            <div class="dz-error-message"><span data-dz-errormessage></span></div>
-                            <div class="dz-success-mark">${options.doneIcon}</div>
-                            <div class="dz-error-mark">${options.errorIcon}</div>
-                        </div>
-                    `;
                 }
             },
             useCustomDropzoneOptions: {
@@ -134,10 +103,8 @@
             }
         },
         methods: {
-            manuallyAddFile: function (file, fileUrl, callback, crossOrigin, options) {
+            manuallyAddFile: function (file, callback, crossOrigin, options) {
                 this.dropzone.emit("addedfile", file);
-                this.dropzone.emit("thumbnail", file, fileUrl);
-                this.dropzone.createThumbnailFromUrl(file, fileUrl, callback, crossOrigin);
                 this.dropzone.emit("complete", file);
                 if ((typeof options.dontSubstractMaxFiles == 'undefined') || !options.dontSubstractMaxFiles) {
                     this.dropzone.options['maxFiles'] = this.dropzone.options['maxFiles'] - 1;
@@ -251,15 +218,12 @@
             this.dropzone = new Dropzone(element, {
                 clickable                   : this.getProp(this.clickable,this.dropzoneOptions.clickable),
                 paramName                   : this.getProp(this.paramName,this.dropzoneOptions.paramName),
-                thumbnailWidth              : this.getProp(this.thumbnailWidth,this.dropzoneOptions.thumbnailWidth),
-                thumbnailHeight             : this.getProp(this.thumbnailHeight,this.dropzoneOptions.thumbnailHeight),
                 maxFiles                    : this.getProp(this.maxNumberOfFiles,this.dropzoneOptions.maxNumberOfFiles),
                 maxFilesize                 : this.getProp(this.maxFileSizeInMB,this.dropzoneOptions.maxFileSizeInMB),
                 addRemoveLinks              : this.getProp(this.showRemoveLink,this.dropzoneOptions.showRemoveLink),
                 acceptedFiles               : this.getProp(this.acceptedFileTypes,this.dropzoneOptions.acceptedFileTypes),
                 autoProcessQueue            : this.getProp(this.autoProcessQueue,this.dropzoneOptions.autoProcessQueue),
                 headers                     : this.getProp(this.headers,this.dropzoneOptions.headers),
-                previewTemplate             : this.previewTemplate(this),
                 dictDefaultMessage          : this.cloudIcon + this.languageSettings.dictDefaultMessage,
                 dictCancelUpload            : this.languageSettings.dictCancelUpload,
                 dictCancelUploadConfirmation: this.languageSettings.dictCancelUploadConfirmation,
@@ -284,10 +248,6 @@
 
             // Handle the dropzone events
             let vm = this;
-
-            this.dropzone.on('thumbnail', function (file) {
-                vm.$emit('vdropzone-thumbnail', file)
-            });
 
             this.dropzone.on('addedfile', function (file) {
                 /**
